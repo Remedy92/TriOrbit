@@ -1,6 +1,6 @@
 # TriOrbit Group
 
-Marketing site for **TriOrbit Group** — a Sofia-based professional cleaning company. Post-construction cleaning, deep home cleaning, professional disinfection, and additional services (carpets, sofas, appliances).
+Marketing site for **TriOrbit Group** — a professional cleaning company operating across Bulgaria, based in Lovech. Post-construction cleaning, deep home cleaning, professional disinfection, and additional services (carpets, sofas, appliances).
 
 Single-page bilingual site (Bulgarian primary, English toggle) with a multi-step inquiry form.
 
@@ -51,7 +51,7 @@ Three-step form (service → property → contact) with progress bar, validation
 
 - **Phone:** 0889 760 505 / 0886 788 815
 - **Email:** triorbit.group@gmail.com
-- **Sofia, Bulgaria** · Mon – Sat, 08:00 – 19:00
+- **Lovech, Bulgaria** · Mon – Sat, 08:00 – 19:00
 
 ## License
 

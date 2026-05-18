@@ -7,6 +7,10 @@
   // ── Language ─────────────────────────────────────────────
   const detectInitialLang = () => {
     try {
+      const param = new URLSearchParams(location.search).get("lang");
+      if (param === "bg" || param === "en") return param;
+    } catch (_) {}
+    try {
       const stored = localStorage.getItem("triorbit-lang");
       if (stored === "bg" || stored === "en") return stored;
     } catch (_) {}
@@ -120,6 +124,32 @@
     phone: "",
     email: "",
     consent: false,
+    company: "", // honeypot
+  };
+
+  const errorEl = document.getElementById("inquiry-error");
+  const submitLabel = document.getElementById("btn-submit-label");
+  const submitLabelOriginal = {
+    bg: submitLabel ? submitLabel.getAttribute("data-bg") : "Изпрати заявка",
+    en: submitLabel ? submitLabel.getAttribute("data-en") : "Send request",
+  };
+  const setSubmitLabel = (bg, en) => {
+    if (!submitLabel) return;
+    submitLabel.setAttribute("data-bg", bg);
+    submitLabel.setAttribute("data-en", en);
+    submitLabel.textContent = currentLang === "en" ? en : bg;
+  };
+  const showError = (bg, en) => {
+    if (!errorEl) return;
+    errorEl.hidden = false;
+    errorEl.setAttribute("data-bg", bg);
+    errorEl.setAttribute("data-en", en);
+    errorEl.textContent = currentLang === "en" ? en : bg;
+  };
+  const clearError = () => {
+    if (!errorEl) return;
+    errorEl.hidden = true;
+    errorEl.textContent = "";
   };
 
   let step = 0;
@@ -201,17 +231,51 @@
   });
 
   // Submit
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (btnSubmit.disabled) return;
 
-    // No backend; surface success state. Hook your endpoint here.
-    // Example payload: console.log("inquiry payload", data);
+    clearError();
+    btnSubmit.disabled = true;
+    setSubmitLabel("Изпращане…", "Sending…");
 
-    steps.forEach((s) => s.classList.remove("is-active"));
-    if (progressBlock) progressBlock.style.display = "none";
-    if (actionsBlock) actionsBlock.style.display = "none";
-    successEl.classList.add("is-active");
+    try {
+      const honeypot = form.querySelector('input[name="company"]');
+      const payload = { ...data, company: honeypot ? honeypot.value : "" };
+
+      const res = await fetch("/api/inquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.status === 429) {
+        showError(
+          "Изпратихте няколко заявки наскоро. Моля, опитайте отново след малко или ни пишете на triorbit.group@gmail.com.",
+          "You've sent several requests recently. Please try again in a few minutes, or email us at triorbit.group@gmail.com."
+        );
+        btnSubmit.disabled = false;
+        setSubmitLabel(submitLabelOriginal.bg, submitLabelOriginal.en);
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+
+      steps.forEach((s) => s.classList.remove("is-active"));
+      if (progressBlock) progressBlock.style.display = "none";
+      if (actionsBlock) actionsBlock.style.display = "none";
+      successEl.classList.add("is-active");
+    } catch (err) {
+      console.error("Inquiry submit failed", err);
+      showError(
+        "Заявката не можа да бъде изпратена. Моля, опитайте отново или ни пишете директно на triorbit.group@gmail.com.",
+        "We couldn't send your request. Please try again, or email us directly at triorbit.group@gmail.com."
+      );
+      btnSubmit.disabled = false;
+      setSubmitLabel(submitLabelOriginal.bg, submitLabelOriginal.en);
+    }
   });
 
   // Reset
@@ -223,8 +287,98 @@
     successEl.classList.remove("is-active");
     if (progressBlock) progressBlock.style.display = "";
     if (actionsBlock) actionsBlock.style.display = "";
+    clearError();
+    setSubmitLabel(submitLabelOriginal.bg, submitLabelOriginal.en);
     renderStep();
   });
 
   renderStep();
+})();
+
+// ─────────────────────────────────────────────────────────────
+// Coverage map — interactive Bulgaria
+// Sticky selection synced between SVG nodes and the city list.
+// ─────────────────────────────────────────────────────────────
+(() => {
+  const wrap = document.querySelector(".coverage-map-wrap");
+  if (!wrap) return;
+
+  const nodes = [...wrap.querySelectorAll(".map-node")];
+  const links = [...wrap.querySelectorAll(".map-link")];
+  const btns = [...wrap.querySelectorAll(".map-citybtn")];
+  const roCity = wrap.querySelector("#ro-city");
+  const roRegion = wrap.querySelector("#ro-region");
+  const roNote = wrap.querySelector("#ro-note");
+  if (!roCity || !roRegion || !roNote) return;
+
+  const lang = () =>
+    document.documentElement.getAttribute("lang") === "en" ? "en" : "bg";
+
+  const NOTE = {
+    bg: (c) => `Обслужваме ${c} и областта. Без такса за пътуване · крайни цени и срокове след оглед на обекта.`,
+    en: (c) => `We cover ${c} and the surrounding area. No travel surcharge · final pricing and timing after a site visit.`,
+  };
+  const BASE_NOTE = {
+    bg: "Седалище на TriOrbit Group. Без такса за пътуване — отговор на запитване до 1 час.",
+    en: "TriOrbit Group's home base. No travel surcharge — inquiry response within 1 hour.",
+  };
+
+  const setText = (el, bg, en) => {
+    el.setAttribute("data-bg", bg);
+    el.setAttribute("data-en", en);
+    el.textContent = lang() === "en" ? en : bg;
+  };
+
+  let current = "lovech";
+
+  const select = (key) => {
+    const btn = btns.find((b) => b.dataset.city === key);
+    if (!btn) return;
+    current = key;
+
+    nodes.forEach((n) => n.classList.toggle("is-active", n.dataset.city === key));
+    links.forEach((l) => l.classList.toggle("is-active", l.dataset.city === key));
+    btns.forEach((b) => {
+      const on = b.dataset.city === key;
+      b.classList.toggle("is-active", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+
+    const nameEl = btn.querySelector(".cb-name");
+    const nameBg = nameEl.getAttribute("data-bg");
+    const nameEn = nameEl.getAttribute("data-en");
+
+    setText(roCity, nameBg, nameEn);
+    setText(roRegion, btn.dataset.regionBg, btn.dataset.regionEn);
+    if (key === "lovech") {
+      setText(roNote, BASE_NOTE.bg, BASE_NOTE.en);
+    } else {
+      setText(roNote, NOTE.bg(nameBg), NOTE.en(nameEn));
+    }
+  };
+
+  btns.forEach((b) => {
+    const k = b.dataset.city;
+    b.addEventListener("click", () => select(k));
+    b.addEventListener("mouseenter", () => select(k));
+    b.addEventListener("focus", () => select(k));
+  });
+
+  nodes.forEach((n) => {
+    const k = n.dataset.city;
+    n.addEventListener("mouseenter", () => select(k));
+    n.addEventListener("click", () => {
+      const btn = btns.find((b) => b.dataset.city === k);
+      if (btn) btn.focus();
+      else select(k);
+    });
+  });
+
+  // Re-render the active readout after a language switch so the
+  // templated note picks up the localized city name.
+  document.querySelectorAll(".lang-btn").forEach((b) => {
+    b.addEventListener("click", () => setTimeout(() => select(current), 0));
+  });
+
+  select("lovech");
 })();
