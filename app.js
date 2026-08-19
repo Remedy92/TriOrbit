@@ -1,10 +1,10 @@
 // ─────────────────────────────────────────────────────────────
 // TriOrbit Group — interactivity
-// Lang toggle · sticky-nav state · multi-step inquiry · scroll reveals
+// Language toggle · sticky nav · mobile menu · scroll reveals · inquiry form
 // ─────────────────────────────────────────────────────────────
 (() => {
 
-  // ── Language ─────────────────────────────────────────────
+  // ── Language ──────────────────────────────────────────────
   const detectInitialLang = () => {
     try {
       const param = new URLSearchParams(location.search).get("lang");
@@ -20,27 +20,16 @@
   const applyLang = (lang) => {
     document.documentElement.setAttribute("lang", lang);
 
-    // Swap text on any element that carries data-bg / data-en
     document.querySelectorAll("[data-bg][data-en]").forEach((el) => {
       const next = el.getAttribute("data-" + lang);
       if (next != null && el.textContent !== next) el.textContent = next;
     });
 
-    // Swap placeholder text on inputs/textareas
     document.querySelectorAll("[data-bg-placeholder][data-en-placeholder]").forEach((el) => {
       const next = el.getAttribute("data-" + lang + "-placeholder");
       if (next != null) el.setAttribute("placeholder", next);
     });
 
-    // Swap selected button values on the form (keeps stored data in sync)
-    document.querySelectorAll(".choice.is-selected, .pill.is-selected").forEach((btn) => {
-      const v = btn.getAttribute("data-value-" + (lang === "en" ? "en" : ""));
-      // For bg, the canonical value is data-value; for en, data-value-en (fallback to data-value)
-      const display = lang === "en" ? btn.getAttribute("data-value-en") : btn.getAttribute("data-value");
-      if (display) btn.dataset.displayValue = display;
-    });
-
-    // Toggle button active state
     document.querySelectorAll(".lang-btn").forEach((b) => {
       b.classList.toggle("is-active", b.getAttribute("data-lang") === lang);
     });
@@ -57,16 +46,15 @@
     });
   });
 
-  // ── Sticky nav scroll state ───────────────────────────────
+  // ── Sticky nav shadow ─────────────────────────────────────
   const nav = document.getElementById("site-nav");
   const onScroll = () => {
-    if (!nav) return;
-    nav.classList.toggle("is-scrolled", window.scrollY > 12);
+    if (nav) nav.classList.toggle("is-scrolled", window.scrollY > 12);
   };
   onScroll();
   window.addEventListener("scroll", onScroll, { passive: true });
 
-  // ── Mobile burger menu ────────────────────────────────────
+  // ── Mobile menu ───────────────────────────────────────────
   const burger = document.getElementById("nav-burger");
   const mobile = document.getElementById("nav-mobile");
   if (burger && mobile) {
@@ -92,7 +80,7 @@
           io.unobserve(e.target);
         }
       });
-    }, { rootMargin: "0px 0px -10% 0px", threshold: 0.05 });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.04 });
     reveal.forEach((el) => io.observe(el));
   } else {
     reveal.forEach((el) => el.classList.add("is-visible"));
@@ -102,49 +90,46 @@
   const form = document.getElementById("inquiry-form");
   if (!form) return;
 
-  const steps = form.querySelectorAll(".inquiry-step");
+  const steps = form.querySelectorAll(".fstep");
   const stepCurrentEl = document.getElementById("step-current");
-  const progressFill = document.getElementById("progress-fill");
+  const stepNameEl = document.getElementById("step-name");
+  const progressBar = document.getElementById("progress-bar");
+  const progressBlock = document.getElementById("form-progress");
+  const actionsBlock = document.getElementById("form-actions");
   const btnBack = document.getElementById("btn-back");
   const btnNext = document.getElementById("btn-next");
   const btnSubmit = document.getElementById("btn-submit");
+  const submitLabel = document.getElementById("btn-submit-label");
   const successEl = document.getElementById("inquiry-success");
   const btnReset = document.getElementById("btn-reset");
-  const progressBlock = form.querySelector(".inquiry-progress");
-  const actionsBlock = form.querySelector(".inquiry-actions");
+  const errorEl = document.getElementById("inquiry-error");
   const TOTAL = 3;
 
+  const STEP_NAMES = [
+    { bg: "услуга", en: "service" },
+    { bg: "обект", en: "site" },
+    { bg: "контакт", en: "contact" },
+  ];
+
   const data = {
-    service: "",
-    propertyType: "",
-    size: "",
-    when: "",
-    notes: "",
-    name: "",
-    phone: "",
-    email: "",
-    consent: false,
-    company: "", // honeypot
+    service: "", propertyType: "", size: "", when: "", notes: "",
+    name: "", phone: "", email: "", consent: false, company: "",
   };
 
-  const errorEl = document.getElementById("inquiry-error");
-  const submitLabel = document.getElementById("btn-submit-label");
   const submitLabelOriginal = {
-    bg: submitLabel ? submitLabel.getAttribute("data-bg") : "Изпрати заявка",
-    en: submitLabel ? submitLabel.getAttribute("data-en") : "Send request",
+    bg: submitLabel ? submitLabel.getAttribute("data-bg") : "Изпратете заявката",
+    en: submitLabel ? submitLabel.getAttribute("data-en") : "Send the request",
   };
-  const setSubmitLabel = (bg, en) => {
-    if (!submitLabel) return;
-    submitLabel.setAttribute("data-bg", bg);
-    submitLabel.setAttribute("data-en", en);
-    submitLabel.textContent = currentLang === "en" ? en : bg;
+  const setText = (el, bg, en) => {
+    if (!el) return;
+    el.setAttribute("data-bg", bg);
+    el.setAttribute("data-en", en);
+    el.textContent = currentLang === "en" ? en : bg;
   };
   const showError = (bg, en) => {
     if (!errorEl) return;
     errorEl.hidden = false;
-    errorEl.setAttribute("data-bg", bg);
-    errorEl.setAttribute("data-en", en);
-    errorEl.textContent = currentLang === "en" ? en : bg;
+    setText(errorEl, bg, en);
   };
   const clearError = () => {
     if (!errorEl) return;
@@ -156,14 +141,14 @@
 
   const renderStep = () => {
     steps.forEach((s) => {
-      const n = Number(s.getAttribute("data-step"));
-      s.classList.toggle("is-active", n === step);
+      s.classList.toggle("is-active", Number(s.getAttribute("data-step")) === step);
     });
     if (stepCurrentEl) stepCurrentEl.textContent = String(step + 1);
-    if (progressFill) progressFill.style.width = ((step + 1) / TOTAL) * 100 + "%";
-
+    setText(stepNameEl, STEP_NAMES[step].bg, STEP_NAMES[step].en);
+    if (progressBar) {
+      [...progressBar.children].forEach((seg, i) => seg.classList.toggle("is-done", i <= step));
+    }
     if (btnBack) btnBack.style.visibility = step > 0 ? "visible" : "hidden";
-
     if (step < TOTAL - 1) {
       btnNext.style.display = "";
       btnSubmit.style.display = "none";
@@ -175,37 +160,25 @@
   };
 
   const updateActionState = () => {
-    const canNext0 = !!data.service;
-    const canNext1 = !!data.propertyType && !!data.when;
-    const canSubmit = !!data.name && (!!data.phone || !!data.email) && !!data.consent;
-
-    if (step === 0) btnNext.disabled = !canNext0;
-    else if (step === 1) btnNext.disabled = !canNext1;
-
-    btnSubmit.disabled = !canSubmit;
+    if (step === 0) btnNext.disabled = !data.service;
+    else if (step === 1) btnNext.disabled = !(data.propertyType && data.when);
+    btnSubmit.disabled = !(data.name && (data.phone || data.email) && data.consent);
   };
 
-  // Choice grid (radio, step 0)
-  form.querySelectorAll('.choice-grid[data-field="service"] .choice').forEach((btn) => {
-    btn.addEventListener("click", () => {
-      form.querySelectorAll('.choice-grid[data-field="service"] .choice').forEach((b) => b.classList.remove("is-selected"));
-      btn.classList.add("is-selected");
-      data.service = btn.getAttribute("data-value");
-      updateActionState();
+  const wireChoices = (selector, field) => {
+    const buttons = form.querySelectorAll(selector);
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        buttons.forEach((b) => b.classList.remove("is-selected"));
+        btn.classList.add("is-selected");
+        data[field] = btn.getAttribute("data-value");
+        updateActionState();
+      });
     });
-  });
+  };
+  wireChoices('.choice-grid[data-field="service"] .choice', "service");
+  wireChoices('.choice-pills[data-field="propertyType"] .pill', "propertyType");
 
-  // Pills (radio, step 1)
-  form.querySelectorAll('.choice-pills[data-field="propertyType"] .pill').forEach((btn) => {
-    btn.addEventListener("click", () => {
-      form.querySelectorAll('.choice-pills[data-field="propertyType"] .pill').forEach((b) => b.classList.remove("is-selected"));
-      btn.classList.add("is-selected");
-      data.propertyType = btn.getAttribute("data-value");
-      updateActionState();
-    });
-  });
-
-  // Inputs
   form.querySelectorAll("input, textarea, select").forEach((el) => {
     const name = el.getAttribute("name");
     if (!name) return;
@@ -216,28 +189,20 @@
     });
   });
 
-  // Navigation buttons
   btnNext.addEventListener("click", () => {
-    if (step < TOTAL - 1) {
-      step += 1;
-      renderStep();
-    }
+    if (step < TOTAL - 1) { step += 1; renderStep(); }
   });
   btnBack.addEventListener("click", () => {
-    if (step > 0) {
-      step -= 1;
-      renderStep();
-    }
+    if (step > 0) { step -= 1; renderStep(); }
   });
 
-  // Submit
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (btnSubmit.disabled) return;
 
     clearError();
     btnSubmit.disabled = true;
-    setSubmitLabel("Изпращане…", "Sending…");
+    setText(submitLabel, "Изпращане…", "Sending…");
 
     try {
       const honeypot = form.querySelector('input[name="company"]');
@@ -255,13 +220,10 @@
           "You've sent several requests recently. Please try again in a few minutes, or email us at triorbit.group@gmail.com."
         );
         btnSubmit.disabled = false;
-        setSubmitLabel(submitLabelOriginal.bg, submitLabelOriginal.en);
+        setText(submitLabel, submitLabelOriginal.bg, submitLabelOriginal.en);
         return;
       }
-
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
+      if (!res.ok) throw new Error("HTTP " + res.status);
 
       steps.forEach((s) => s.classList.remove("is-active"));
       if (progressBlock) progressBlock.style.display = "none";
@@ -274,111 +236,99 @@
         "We couldn't send your request. Please try again, or email us directly at triorbit.group@gmail.com."
       );
       btnSubmit.disabled = false;
-      setSubmitLabel(submitLabelOriginal.bg, submitLabelOriginal.en);
+      setText(submitLabel, submitLabelOriginal.bg, submitLabelOriginal.en);
     }
   });
 
-  // Reset
   btnReset.addEventListener("click", () => {
     step = 0;
     Object.keys(data).forEach((k) => { data[k] = typeof data[k] === "boolean" ? false : ""; });
     form.reset();
-    form.querySelectorAll(".choice.is-selected, .pill.is-selected").forEach((b) => b.classList.remove("is-selected"));
+    form.querySelectorAll(".choice.is-selected").forEach((b) => b.classList.remove("is-selected"));
     successEl.classList.remove("is-active");
     if (progressBlock) progressBlock.style.display = "";
     if (actionsBlock) actionsBlock.style.display = "";
     clearError();
-    setSubmitLabel(submitLabelOriginal.bg, submitLabelOriginal.en);
+    setText(submitLabel, submitLabelOriginal.bg, submitLabelOriginal.en);
     renderStep();
   });
 
   renderStep();
 })();
 
-// ─────────────────────────────────────────────────────────────
-// Coverage map — interactive Bulgaria
-// Sticky selection synced between SVG nodes and the city list.
-// ─────────────────────────────────────────────────────────────
+/* ── Before / after wipe ──────────────────────────────────────── */
 (() => {
-  const wrap = document.querySelector(".coverage-map-wrap");
-  if (!wrap) return;
+  const hero = document.getElementById("top");
+  const wipe = document.getElementById("wipe");
+  const knob = document.getElementById("wipe-knob");
+  const range = document.getElementById("wipe-range");
+  if (!hero || !wipe || !knob || !range) return;
 
-  const nodes = [...wrap.querySelectorAll(".map-node")];
-  const links = [...wrap.querySelectorAll(".map-link")];
-  const btns = [...wrap.querySelectorAll(".map-citybtn")];
-  const roCity = wrap.querySelector("#ro-city");
-  const roRegion = wrap.querySelector("#ro-region");
-  const roNote = wrap.querySelector("#ro-note");
-  if (!roCity || !roRegion || !roNote) return;
-
-  const lang = () =>
-    document.documentElement.getAttribute("lang") === "en" ? "en" : "bg";
-
-  const NOTE = {
-    bg: (c) => `Обслужваме ${c} и областта. Без такса за пътуване · крайни цени и срокове след оглед на обекта.`,
-    en: (c) => `We cover ${c} and the surrounding area. No travel surcharge · final pricing and timing after a site visit.`,
-  };
-  const BASE_NOTE = {
-    bg: "Седалище на TriOrbit Group. Без такса за пътуване — отговор на запитване до 1 час.",
-    en: "TriOrbit Group's home base. No travel surcharge — inquiry response within 1 hour.",
+  const set = (pct) => {
+    const v = Math.min(100, Math.max(0, pct));
+    hero.style.setProperty("--x", v + "%");
+    range.value = String(Math.round(v));
   };
 
-  const setText = (el, bg, en) => {
-    el.setAttribute("data-bg", bg);
-    el.setAttribute("data-en", en);
-    el.textContent = lang() === "en" ? en : bg;
+  const fromEvent = (e) => {
+    const r = wipe.getBoundingClientRect();
+    return ((e.clientX - r.left) / r.width) * 100;
   };
 
-  let current = "lovech";
+  let dragging = false;
+  const stopDemo = () => hero.classList.remove("is-demo");
 
-  const select = (key) => {
-    const btn = btns.find((b) => b.dataset.city === key);
-    if (!btn) return;
-    current = key;
+  knob.addEventListener("pointerdown", (e) => {
+    dragging = true;
+    stopDemo();
+    knob.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+  knob.addEventListener("pointermove", (e) => { if (dragging) set(fromEvent(e)); });
+  knob.addEventListener("pointerup", () => { dragging = false; });
+  knob.addEventListener("pointercancel", () => { dragging = false; });
 
-    nodes.forEach((n) => n.classList.toggle("is-active", n.dataset.city === key));
-    links.forEach((l) => l.classList.toggle("is-active", l.dataset.city === key));
-    btns.forEach((b) => {
-      const on = b.dataset.city === key;
-      b.classList.toggle("is-active", on);
-      b.setAttribute("aria-pressed", on ? "true" : "false");
-    });
-
-    const nameEl = btn.querySelector(".cb-name");
-    const nameBg = nameEl.getAttribute("data-bg");
-    const nameEn = nameEl.getAttribute("data-en");
-
-    setText(roCity, nameBg, nameEn);
-    setText(roRegion, btn.dataset.regionBg, btn.dataset.regionEn);
-    if (key === "lovech") {
-      setText(roNote, BASE_NOTE.bg, BASE_NOTE.en);
-    } else {
-      setText(roNote, NOTE.bg(nameBg), NOTE.en(nameEn));
-    }
-  };
-
-  btns.forEach((b) => {
-    const k = b.dataset.city;
-    b.addEventListener("click", () => select(k));
-    b.addEventListener("mouseenter", () => select(k));
-    b.addEventListener("focus", () => select(k));
+  wipe.addEventListener("pointerdown", (e) => {
+    if (e.target === knob || knob.contains(e.target)) return;
+    stopDemo();
+    set(fromEvent(e));
   });
 
-  nodes.forEach((n) => {
-    const k = n.dataset.city;
-    n.addEventListener("mouseenter", () => select(k));
-    n.addEventListener("click", () => {
-      const btn = btns.find((b) => b.dataset.city === k);
-      if (btn) btn.focus();
-      else select(k);
-    });
+  knob.addEventListener("keydown", (e) => {
+    const step = e.shiftKey ? 10 : 4;
+    if (e.key === "ArrowLeft") { stopDemo(); set(Number(range.value) - step); e.preventDefault(); }
+    if (e.key === "ArrowRight") { stopDemo(); set(Number(range.value) + step); e.preventDefault(); }
   });
+  range.addEventListener("input", () => { stopDemo(); set(Number(range.value)); });
 
-  // Re-render the active readout after a language switch so the
-  // templated note picks up the localized city name.
-  document.querySelectorAll(".lang-btn").forEach((b) => {
-    b.addEventListener("click", () => setTimeout(() => select(current), 0));
-  });
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  set(reduced ? 50 : 96);
+  if (!reduced) {
+    hero.classList.add("is-demo");
+    setTimeout(() => set(38), 700);
+    setTimeout(() => { if (!dragging) set(52); }, 2500);
+  }
+})();
 
-  select("lovech");
+/* ── Section index + nav highlight ────────────────────────────── */
+(() => {
+  const ids = ["services", "report", "process", "coverage", "pricing", "inquiry", "contact"];
+  const sections = ids.map((id) => document.getElementById(id)).filter(Boolean);
+  const rail = document.querySelectorAll("#idx-rail a");
+  const links = document.querySelectorAll(".nav-link");
+  if (!sections.length || !("IntersectionObserver" in window)) return;
+
+  const mark = (id) => {
+    rail.forEach((a) => a.classList.toggle("is-on", a.getAttribute("href") === "#" + id));
+    links.forEach((a) => a.classList.toggle("is-here", a.getAttribute("href") === "#" + id));
+  };
+
+  const io = new IntersectionObserver((entries) => {
+    const hit = entries
+      .filter((e) => e.isIntersecting)
+      .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+    if (hit) mark(hit.target.id);
+  }, { rootMargin: "-45% 0px -45% 0px", threshold: [0, 0.01, 0.5, 1] });
+
+  sections.forEach((s) => io.observe(s));
 })();
