@@ -9,10 +9,11 @@ Single-page bilingual site (Bulgarian primary, English toggle) with a multi-step
 Zero-build, zero-dependency static site:
 
 - `index.html` — semantic markup, BG copy in-DOM, `data-bg` / `data-en` swap attributes
-- `styles.css` — design tokens (dark + gold accent), Manrope + JetBrains Mono, airy density
-- `app.js` — language toggle, sticky-nav scroll state, mobile menu, scroll reveals, multi-step inquiry form
+- `styles.css` — design tokens, layout, responsive rules
+- `app.js` — language toggle, sticky-nav state, mobile menu, scroll reveals, multi-step inquiry form
+- `api/inquiry.mjs` — serverless handler for the inquiry form (rate limiting, origin check, validation)
 
-Manrope and JetBrains Mono are loaded from Google Fonts. No bundler, no framework, no service worker.
+Prata and Onest are loaded from Google Fonts. No bundler, no framework, no service worker.
 
 ## Run locally
 
@@ -23,29 +24,34 @@ python3 -m http.server 8000
 # then visit http://localhost:8000
 ```
 
-## Design tokens
+## Design
+
+White, black, and a single gold accent. Prata for display type and prices, Onest for body text and labels. Soft geometry throughout — pill buttons and inputs, 16/26/40/56px card radii, rounded section blocks. No uppercase labels anywhere.
 
 ```
-Background:  oklch(0.165 0.020 255)  — deep navy-black
-Accent:      oklch(0.78 0.135 82)    — TriOrbit gold
-Ink:         oklch(0.97 0.005 80)    — warm off-white
-Display:     Manrope 700 / -0.025em
-Body:        Manrope 300/400
-Eyebrow:     JetBrains Mono 500 / uppercase / 0.20em tracking
-Section gap: 176px (airy)
+White:      #ffffff   page ground
+Grey 04:    #f4f4f4   secondary bands, chips, cards
+Grey 12:    #e2e2e2   hairlines on grey
+Grey 66:    #565656   body text
+Black:      #000000   headings, dark blocks
+Gold:       #d0a45e   brand mark, one accent button, active states
 ```
 
-Override via CSS custom properties on `:root` in `styles.css`.
+The gold is deliberately rare: the orbit mark, the accent button, the active form step, the discount figures, and the eyebrow dot. Override any token on `:root` in `styles.css`.
+
+Illustration is vector only — soft circular medallions for the four services, a gradient "orbit lens" in the hero, an arc rail for the process, and the Bulgaria coverage map. The photo slots in the sign-off protocol are empty plates awaiting real job photography.
+
+Source design canvas: https://claude.ai/code/artifact/9cd14afd-2e85-41d5-92fd-d2ddb567eea4 — the working artboards live in `design/`.
 
 ## Bilingual content
 
 Every translatable element carries both `data-bg` and `data-en` attributes; the BG copy lives in the HTML body so the page is SEO-friendly for the Bulgarian market by default. `app.js` swaps `textContent` on toggle and persists the choice in `localStorage`.
 
-Adding a new translation: add the BG copy as the element's text, plus `data-bg="…"` and `data-en="…"` attributes. Inputs/textareas use `data-bg-placeholder` / `data-en-placeholder`.
+Adding a new translation: add the BG copy as the element's text, plus `data-bg="…"` and `data-en="…"` attributes. Inputs/textareas use `data-bg-placeholder` / `data-en-placeholder`. Multi-line headings wrap each line in `<span class="line">` so the swap does not eat the line break.
 
 ## Inquiry form
 
-Three-step form (service → property → contact) with progress bar, validation between steps, and a success state. No backend — wire your endpoint in `app.js` inside the submit handler (look for the `Hook your endpoint here` comment).
+Three steps (service → site → contact) with a progress bar, per-step validation, and a success state. It posts JSON to `/api/inquiry`; the handler rate-limits by IP, checks the origin in production, validates fields, and screens a honeypot.
 
 ## Contact
 

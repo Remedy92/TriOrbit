@@ -1,0 +1,169 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Prata&family=Onest:wght@300;400;500;600&display=swap');
+
+:root{
+  --ivory:    #ffffff;
+  --sand:     #f4f4f4;
+  --sand2:    #e2e2e2;
+  --espresso: #000000;
+  --esp2:     #141414;
+  --ink:      #000000;
+  --ink2:     #565656;
+  --ink3:     #8c8c8c;
+  --line:     #eaeaea;
+  --dline:    #2b2b2b;
+  --dtext:    #ffffff;
+  --dmute:    #a6a6a6;
+  --gold:     #d0a45e;
+
+  --display: "Prata", Georgia, "Times New Roman", serif;
+  --sans:    "Onest", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  --r-s:  16px;
+  --r-m:  26px;
+  --r-l:  40px;
+  --r-xl: 56px;
+  --pill: 999px;
+}
+*,*::before,*::after{ box-sizing:border-box; }
+body{ margin:0; background:var(--ivory); color:var(--ink); font-family:var(--sans); font-size:16px; font-weight:400; line-height:1.62; -webkit-font-smoothing:antialiased; }
+a{ color:inherit; text-decoration:none; }
+a:hover{ color:var(--gold); }
+svg{ display:block; }
+p{ margin:0; }
+h1,h2,h3,h4{ margin:0; font-family:var(--display); font-weight:400; letter-spacing:-0.02em; line-height:1.08; }
+.wrap{ width:1240px; margin:0 auto; }
+.lbl{ font-family:var(--sans); font-size:13.5px; font-weight:500; letter-spacing:0.005em; color:var(--ink3); }
+.lbl-d{ font-family:var(--sans); font-size:13.5px; font-weight:500; letter-spacing:0.005em; color:var(--dmute); }
+.body{ color:var(--ink2); font-size:16.5px; line-height:1.68; font-weight:300; }
+.body-d{ color:var(--dmute); font-size:16.5px; line-height:1.68; font-weight:300; }
+.pillbtn{ display:inline-flex; align-items:center; gap:12px; height:58px; padding:0 30px; border-radius:var(--pill); font-size:15.5px; font-weight:500; transition:background-color .2s ease; }
+
+.fl{ font-size:13px; font-weight:400; color:var(--dmute); }
+.fi{ height:56px; border-radius:var(--pill); border:1px solid var(--dline); padding:0 22px; display:flex; align-items:center; font-size:15px; color:var(--dtext); }
+.ch{ height:56px; border-radius:var(--pill); border:1px solid var(--dline); display:flex; align-items:center; justify-content:center; font-size:14.5px; color:var(--dmute); padding:0 12px; text-align:center; }
+.pr{ display:flex; align-items:center; gap:14px; padding:15px 0; border-top:1px solid var(--line); }
+  </style>
+</helmet>
+
+<div style="--gold: {{accent}}; width: 1440px; background: var(--ivory);">
+
+  <div class="wrap" style="padding: 88px 0 88px;">
+    <div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 32px; align-items: start;">
+
+      <div style="grid-column: span 5; display: flex; flex-direction: column; gap: 28px; padding-top: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--gold);"></span><span class="lbl">Заявка</span></div>
+        <h1 style="font-size: 62px; letter-spacing: -0.028em; line-height: 1.05;">Оферта в рамките<br>на един час.</h1>
+        <p class="body" style="max-width: 40ch;">Три кратки стъпки — услуга, обект, контакт. Отговаряме с фиксирана цена и предлагаме безплатен оглед в рамките на 24–48 часа.</p>
+        <div style="display: flex; flex-direction: column; margin-top: 10px;">
+          <div class="pr">
+            <svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="var(--gold)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.6 3 6v4.6c0 4 2.9 6.4 7 7.4 4.1-1 7-3.4 7-7.4V6l-7-3.4Z"></path><path d="m7.2 10 2 2 3.6-3.8"></path></svg>
+            <span style="font-size: 15px;">Без ангажимент и без такса за оглед</span>
+          </div>
+          <div class="pr">
+            <svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="var(--ink3)" stroke-width="1.3" stroke-linecap="round"><circle cx="10" cy="10" r="7.4"></circle><path d="M10 5.8V10l2.8 1.8"></path></svg>
+            <span style="font-size: 15px; color: var(--ink2);">Отговор до един час в работно време</span>
+          </div>
+          <div class="pr" style="border-bottom: 1px solid var(--line);">
+            <svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="var(--ink3)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="2.6" y="4.6" width="14.8" height="11" rx="2.4"></rect><path d="M2.6 8.4h14.8"></path><path d="M6.4 4.6V2.8M13.6 4.6V2.8"></path></svg>
+            <span style="font-size: 15px; color: var(--ink2);">Оглед в рамките на 24–48 часа</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="grid-column: 7 / span 6; background: var(--espresso); border-radius: var(--r-xl); padding: 44px 46px 46px; display: flex; flex-direction: column; gap: 28px;">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span class="lbl-d">стъпка 2 от 3 · обект</span>
+            <span class="lbl-d" style="color: var(--gold);">около 40 секунди</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;">
+            <span style="height: 3px; border-radius: var(--pill); background: var(--gold);"></span>
+            <span style="height: 3px; border-radius: var(--pill); background: var(--gold);"></span>
+            <span style="height: 3px; border-radius: var(--pill); background: var(--dline);"></span>
+          </div>
+        </div>
+
+        <h2 style="font-size: 36px; letter-spacing: -0.024em; color: var(--dtext);">Разкажете ни за обекта.</h2>
+
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px;">
+          <div style="display: flex; flex-direction: column; gap: 9px;"><span class="fl">Тип имот</span><div class="fi">Апартамент</div></div>
+          <div style="display: flex; flex-direction: column; gap: 9px;"><span class="fl">Квадратура</span><div class="fi">85 м²</div></div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px;">
+          <div style="display: flex; flex-direction: column; gap: 9px;"><span class="fl">Град</span><div class="fi">Ловеч</div></div>
+          <div style="display: flex; flex-direction: column; gap: 9px;"><span class="fl">Желана дата</span><div class="fi" style="color: var(--dmute);">дд.мм.гггг</div></div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 9px;">
+          <span class="fl">Състояние на обекта</span>
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
+            <div class="ch">Обичайно</div>
+            <div class="ch" style="border-color: var(--gold); color: var(--dtext);">След ремонт</div>
+            <div class="ch">Силно замърсен</div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 9px;">
+          <span class="fl">Бележки</span>
+          <div style="min-height: 96px; border-radius: var(--r-m); border: 1px solid var(--dline); padding: 18px 22px; font-size: 15px; color: var(--dmute);">Брой бани, тераса, дограма отвън, достъп с асансьор…</div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 6px;">
+          <a href="#" style="display: inline-flex; align-items: center; gap: 10px; font-size: 15px; color: var(--dmute);">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 8h-11"></path><path d="M7 12.5 2.5 8 7 3.5"></path></svg>
+            <span>Назад</span>
+          </a>
+          <a href="#" class="pillbtn" style="background: var(--gold); color: var(--espresso);">
+            <span>Продължете</span>
+            <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h11"></path><path d="M9 3.5 13.5 8 9 12.5"></path></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="background: var(--sand); border-radius: var(--r-xl) var(--r-xl) 0 0;">
+    <div class="wrap" style="padding: 88px 0; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 32px;">
+      <div style="grid-column: span 4; display: flex; flex-direction: column; gap: 22px;">
+        <div style="display: flex; align-items: center; gap: 12px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--gold);"></span><span class="lbl">Контакт</span></div>
+        <h2 style="font-size: 48px; letter-spacing: -0.026em; line-height: 1.06;">Готови сме<br>да отговорим.</h2>
+      </div>
+      <div style="grid-column: 6 / span 7; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px;">
+        <div style="background: var(--ivory); border-radius: var(--r-m); padding: 26px 28px; display: flex; flex-direction: column; gap: 12px;">
+          <span class="lbl">телефон</span>
+          <a href="tel:0889760505" style="font-family: var(--display); font-size: 24px; letter-spacing: -0.02em;">0889 760 505</a>
+          <a href="tel:0886788815" style="font-family: var(--display); font-size: 24px; letter-spacing: -0.02em; color: var(--ink2);">0886 788 815</a>
+        </div>
+        <div style="background: var(--ivory); border-radius: var(--r-m); padding: 26px 28px; display: flex; flex-direction: column; gap: 12px;">
+          <span class="lbl">имейл</span>
+          <a href="mailto:triorbit.group@gmail.com" style="font-size: 15.5px; line-height: 1.45;">triorbit.group@gmail.com</a>
+        </div>
+        <div style="background: var(--ivory); border-radius: var(--r-m); padding: 26px 28px; display: flex; flex-direction: column; gap: 12px;">
+          <span class="lbl">база и часове</span>
+          <span style="font-size: 15.5px; line-height: 1.5;">Ловеч, България<br>пон – съб, 08:00 – 19:00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"accent":{"editor":"color","default":"#d0a45e","section":"Марка","options":["#d0a45e","#8a9a86","#a8705a","#7f8b9c"]}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { accent: this.props.accent ?? '#d0a45e' };
+  }
+}
+</script>
+</body>
+</html>
