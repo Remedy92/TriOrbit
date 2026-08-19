@@ -90,7 +90,7 @@
   const form = document.getElementById("inquiry-form");
   if (!form) return;
 
-  const steps = form.querySelectorAll(".form-step");
+  const steps = form.querySelectorAll(".fstep");
   const stepCurrentEl = document.getElementById("step-current");
   const stepNameEl = document.getElementById("step-name");
   const progressBar = document.getElementById("progress-bar");
@@ -254,4 +254,81 @@
   });
 
   renderStep();
+})();
+
+/* ── Before / after wipe ──────────────────────────────────────── */
+(() => {
+  const hero = document.getElementById("top");
+  const wipe = document.getElementById("wipe");
+  const knob = document.getElementById("wipe-knob");
+  const range = document.getElementById("wipe-range");
+  if (!hero || !wipe || !knob || !range) return;
+
+  const set = (pct) => {
+    const v = Math.min(100, Math.max(0, pct));
+    hero.style.setProperty("--x", v + "%");
+    range.value = String(Math.round(v));
+  };
+
+  const fromEvent = (e) => {
+    const r = wipe.getBoundingClientRect();
+    return ((e.clientX - r.left) / r.width) * 100;
+  };
+
+  let dragging = false;
+  const stopDemo = () => hero.classList.remove("is-demo");
+
+  knob.addEventListener("pointerdown", (e) => {
+    dragging = true;
+    stopDemo();
+    knob.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+  knob.addEventListener("pointermove", (e) => { if (dragging) set(fromEvent(e)); });
+  knob.addEventListener("pointerup", () => { dragging = false; });
+  knob.addEventListener("pointercancel", () => { dragging = false; });
+
+  wipe.addEventListener("pointerdown", (e) => {
+    if (e.target === knob || knob.contains(e.target)) return;
+    stopDemo();
+    set(fromEvent(e));
+  });
+
+  knob.addEventListener("keydown", (e) => {
+    const step = e.shiftKey ? 10 : 4;
+    if (e.key === "ArrowLeft") { stopDemo(); set(Number(range.value) - step); e.preventDefault(); }
+    if (e.key === "ArrowRight") { stopDemo(); set(Number(range.value) + step); e.preventDefault(); }
+  });
+  range.addEventListener("input", () => { stopDemo(); set(Number(range.value)); });
+
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  set(reduced ? 50 : 96);
+  if (!reduced) {
+    hero.classList.add("is-demo");
+    setTimeout(() => set(38), 700);
+    setTimeout(() => { if (!dragging) set(52); }, 2500);
+  }
+})();
+
+/* ── Section index + nav highlight ────────────────────────────── */
+(() => {
+  const ids = ["services", "report", "process", "coverage", "pricing", "inquiry", "contact"];
+  const sections = ids.map((id) => document.getElementById(id)).filter(Boolean);
+  const rail = document.querySelectorAll("#idx-rail a");
+  const links = document.querySelectorAll(".nav-link");
+  if (!sections.length || !("IntersectionObserver" in window)) return;
+
+  const mark = (id) => {
+    rail.forEach((a) => a.classList.toggle("is-on", a.getAttribute("href") === "#" + id));
+    links.forEach((a) => a.classList.toggle("is-here", a.getAttribute("href") === "#" + id));
+  };
+
+  const io = new IntersectionObserver((entries) => {
+    const hit = entries
+      .filter((e) => e.isIntersecting)
+      .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+    if (hit) mark(hit.target.id);
+  }, { rootMargin: "-45% 0px -45% 0px", threshold: [0, 0.01, 0.5, 1] });
+
+  sections.forEach((s) => io.observe(s));
 })();

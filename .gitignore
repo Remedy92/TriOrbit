@@ -9,3 +9,5 @@ node_modules/
 .vercel
 triorbit-website-redesign.html
 __pycache__/
+
+.playwright-mcp/
